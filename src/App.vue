@@ -1,71 +1,101 @@
 <template>
   <div id="app">
-    <img :alt="imageAlt" :src="imageSrc">
-<!--    <button @click="incCounter1">inc2 {{ counter1 }}</button>-->
-    <div class="hello">{{ title }}</div>
+    <h1>input value : {{ inputValue }}</h1>
+    <input type="text" v-model.trim="inputValue" @keypress.enter="createNewTodo"/>
+    <button @click="createNewTodo">create todo</button>
 
-    <ul>
-      <li v-for="(item, index) of items" :key="item" @click="onListItemClick(item)">{{item}} == {{index}}
-        <button @click="itemRemove(item,index)">remove</button>
-      </li>
-    </ul>
+    <div v-if="todo">{{todo.id}} = {{todo.title}} = {{todo.completed}}</div>
 
-    <h1 v-show="counter === 0">Hello</h1>
-<!--    <h1 v-if="counter === 0">Hello</h1>-->
-<!--    <h1 v-else-if="counter === 1">1</h1>-->
-<!--    <h1 v-else-if="counter === 2">2</h1>-->
-<!--    <h1 v-else>World</h1>-->
-
-    <Counter :counter="counter" @handleIncClick="incHandler" @handleDecClick="decHandler"/>
-
+<ul v-if="todos.length">
+  <li v-for="todo of todos" :key="todo.id"
+      @click="selectedTodoId = todo.id">{{todo.id}} = {{todo.title}} = {{todo.completed}}</li>
+</ul>
+    <h2 v-else-if="loading">LOADING...</h2>
+    <h2 v-else>NO DATA</h2>
+    <!--    SHORT METHOD-->
+    <!--    <input type="text" v-model="inputValue"-->
+    <!--           @keypress="nandlerinput"-->
+    <!--           @keypress.enter="alerHandler"/>-->
+    <!--    <input type="checkbox" v-model="checkOn"/>-->
+    <!--    <div v-for="error of errors" :key="error">{{error}}</div>-->
+    <!--    <button @click.once="checkOn = !checkOn">toggle checkbox</button>-->
+    <!--    <input type="text" :value="inputValue" @input = "inputValue = $event.target.value"/>-->
   </div>
 </template>
 
 <script>
-import Counter from './components/Counter'
-import Img from './assets/logo.png'
 
 export default {
   name: 'App',
-  components: {
-    Counter
-  },
   data() {
     return {
-      counter: 0,
-      counter1: 0,
-      title: 'Dynamic text',
-      imageAlt: 'Vue logo',
-      imageSrc: Img,
-      items:[1,2,3,4]
+      inputValue: '',
+      // errors: [],
+      // checkOn:false
+      todos: [],
+      todo:null,
+      selectedTodoId:null,
+      loading: false
     }
   },
   methods: {
-    onListItemClick(itemValue) {
-      console.log(itemValue)
-    },
-    itemRemove(item) {
-      this.items = this.items.filter(el => el !==item)
-    },
-    incHandler(a, b, c) {
-      console.log(a, b, c)
-      this.counter++
-    },
-    decHandler() {
-      this.counter--
-    },
-    // incCounter1() {
-    //   this.counter1++
+    // nandlerinput(e) {
+    //   const {target: {value}} = e
+    //   if (value.length >= 3) {
+    //     e.preventDefault();
+    //   }
+    // },
+    // alerHandler (){
+    //   alert('hello')
     // }
+    createNewTodo() {
+      if (!this.inputValue) return;
+      const newTodo = {
+        id: Math.random(),
+        title: this.inputValue,
+        completed: false
+      }
+      this.todos.unshift(newTodo);
+      this.inputValue = ''
+    },
+    async fetchTodos() {
+      try {
+        this.loading = true
+
+        const res = await fetch('https://jsonplaceholder.typicode.com/todos');
+        this.todos = await res.json()
+      } catch (e){
+        console.log(e)
+      } finally {
+        this.loading = false
+      }
+    },
+    async fetchTodo(id) {
+      try {
+        this.loading = true
+
+        const res = await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`);
+        this.todo = await res.json()
+      } catch (e){
+        console.log(e)
+      } finally {
+        this.loading = false
+      }
+    }
+  },
+  watch: {
+    selectedTodoId() {
+      this.fetchTodo(this.selectedTodoId)
+    }
   },
 
-  // computed: {
-  //   counterVal() {
-  //     console.log('xxxxxxxxx')
-  //     return `Counter value is ${this.counter}`.toUpperCase().replaceAll(' ', '_')
-  //   }
-  // }
+  //lifecycle
+  created() {
+    console.log(this.inputValue, this.testMethod, 'created')
+    this.fetchTodos()
+  }
 }
+
 </script>
 
 <style>
@@ -78,8 +108,4 @@ export default {
   margin-top: 60px;
 }
 
-.hello {
-  background: chartreuse;
-  color: darkcyan;
-}
 </style>
