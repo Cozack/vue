@@ -1,5 +1,11 @@
 <template>
   <div id="app">
+    <h1>{{ counterFormated }}</h1>
+    <h1> Counter is: {{ counter }}</h1>
+    <h1> Counter2 is: {{ counter2 }}</h1>
+    <button @click="inc">inc</button>
+    <button @click="incCustom(10)">inc custom</button>
+    <br>
     <router-link to="/foo">Go to Foo</router-link>
     <br>
     <router-link to="/bar">Go to Bar</router-link>
@@ -7,20 +13,29 @@
     <router-link to="/posts">Posts</router-link>
     <br>
     <router-link to="/posts/1">Post</router-link>
-
-
     <router-view></router-view>
   </div>
 
 </template>
 
 <script>
+import { mapState, mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'App',
   created() {
-   console.log(this)
+    console.log(this)
   },
+  computed: {
+    ...mapState({
+      counter: state => state.counter1.count,
+      counter2: state => state.counter2.count,
+    }),
+    ...mapGetters ( 'counter1', ['counterFormated']),
+  },
+  methods: {
+    ...mapActions('counter1', ['inc', 'incCustom'])
+  }
 }
 
 </script>

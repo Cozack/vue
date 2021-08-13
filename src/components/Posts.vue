@@ -17,25 +17,15 @@
 </template>
 
 <script>
+import {mapState, mapActions} from 'vuex'
 export default {
   name: "Posts",
   created() {
     this.fetchPosts()
   },
-  data() {
-    return {
-      posts: []
-    }
-  },
-  methods: {
-     async fetchPosts() {
-       try {
-         this.posts = await (await fetch('https://jsonplaceholder.typicode.com/posts')).json()
-       } catch (e) {
-         console.log(e)
-       }
-     }
-  }
+  computed: mapState('posts',['posts']),
+  methods:mapActions('posts',["fetchPosts"])
+
 }
 </script>
 

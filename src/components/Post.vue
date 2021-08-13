@@ -17,6 +17,7 @@ export default {
   name: "Post",
   created() {
     console.log(this.$route)
+
     this.fetchPost()
   },
   data() {
